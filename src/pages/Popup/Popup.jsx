@@ -1,26 +1,35 @@
-import React from 'react';
-import logo from '../../assets/img/logo.svg';
-import Greetings from '../../containers/Greetings/Greetings';
-import './Popup.css';
+import React, { useEffect, useState } from 'react';
+import { Form } from 'react-bootstrap';
+
+import Box from '../../components/base/Box';
 
 const Popup = () => {
+  const [contents, setContents] = useState(null);
+
+  useEffect(() => {
+    console.log('Popup mounted!');
+
+    const port = chrome.runtime.connect({ name: 'STORAGE_API' });
+    port.postMessage({ func: 'load' });
+    port.onMessage.addListener(function (msg) {
+      if (msg.result === 'load') {
+        setContents(msg.values);
+      }
+    });
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/pages/Popup/Popup.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Box p={3}>
+      <Form>
+        {/* <Form.Check
+          type="switch"
+          id="custom-switch"
+          label="Check this switch"
+        /> */}
+        <Form.Control type="text" placeholder="스크래핑 대상 ID" />
+      </Form>
+      {contents && contents.map((item) => <Box>{item.name}</Box>)}
+    </Box>
   );
 };
 
